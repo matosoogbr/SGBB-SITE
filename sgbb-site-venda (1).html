@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SGBB · Pare de perder horas com boleto | Primeserv TI</title>
+<meta name="description" content="O SGBB emite, avisa, dá baixa e mostra quem deve. Cobrança por boleto no piloto automático para condomínios, escolas, provedores, clínicas e mais.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+
+<noscript><style>.revelar { opacity: 1 !important; transform: none !important; }</style></noscript>
+
+<style>
+/* =====================================================
+   1. VARIÁVEIS (edite cores, fontes e medidas aqui)
+   ===================================================== */
+:root {
+  --cor-fundo-escuro: #0b1220;
+  --cor-fundo-escuro-2: #121f3a;
+  --cor-fundo-claro: #f4f6fa;
+  --cor-superficie: #ffffff;
+  --cor-campo: #f1f4f9;
+  --cor-laranja: #f97316;
+  --cor-laranja-escuro: #c2410c;
+  --cor-laranja-claro: #fff4ea;
+  --cor-texto: #0b1220;
+  --cor-texto-suave: #4a5870;
+  --cor-texto-claro: #e8edf7;
+  --cor-texto-claro-suave: #a9b6cf;
+  --cor-borda: #e2e7f0;
+
+  --fonte-titulo: "Space Grotesk", system-ui, sans-serif;
+  --fonte-texto: "DM Sans", system-ui, sans-serif;
+
+  --largura-maxima: 1160px;
+  --raio-grande: 20px;
+  --raio-medio: 12px;
+  --sombra-suave: 0 10px 30px rgba(11, 18, 32, .07);
+  --sombra-forte: 0 24px 60px rgba(11, 18, 32, .16);
+}
+
+/* =====================================================
+   2. BASE
+   ===================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 84px; }
+body { margin: 0; font-family: var(--fonte-texto); font-size: 1.05rem; line-height: 1.6; color: var(--cor-texto); background: var(--cor-superficie); }
+h1, h2, h3, h4 { font-family: var(--fonte-titulo); line-height: 1.1; margin: 0 0 .5em; letter-spacing: -.02em; }
+p { margin: 0 0 1em; }
+a { color: inherit; }
+:focus-visible { outline: 3px solid var(--cor-laranja); outline-offset: 3px; border-radius: 4px; }
+
+.conteudo { width: min(var(--largura-maxima), 100% - 2.5rem); margin-inline: auto; }
+.secao { padding: clamp(3.5rem, 8vw, 6rem) 0; }
+.secao-clara { background: var(--cor-fundo-claro); }
+.secao-branca { background: var(--cor-superficie); }
+.secao-escura { background: var(--cor-fundo-escuro); color: var(--cor-texto-claro); }
+
+.cabecalho-secao { text-align: center; margin: 0 auto clamp(2rem, 4vw, 3rem); max-width: 760px; }
+.titulo-secao { font-size: clamp(2rem, 4.4vw, 3rem); }
+.subtitulo-secao { color: var(--cor-texto-suave); font-size: 1.15rem; margin: 0; }
+.secao-escura .titulo-secao { color: #fff; }
+.secao-escura .subtitulo-secao { color: var(--cor-texto-claro-suave); }
+.destaque-laranja { background: linear-gradient(90deg, #f97316, #ea580c); -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+.botao { display: inline-block; padding: .85rem 1.6rem; border-radius: 999px; font-weight: 700; text-decoration: none; border: 2px solid transparent; cursor: pointer; font-family: inherit; font-size: 1rem; text-align: center; transition: background .2s, border-color .2s, transform .2s, box-shadow .2s; }
+.botao-principal { background: var(--cor-laranja); color: #1a0f05; }
+.botao-principal:hover { background: #ff8a3d; transform: translateY(-1px); box-shadow: 0 8px 20px rgba(249,115,22,.28); }
+.botao-escuro { background: var(--cor-fundo-escuro); color: #fff; }
+.botao-escuro:hover { background: #1a2a4c; transform: translateY(-1px); }
+.botao-contorno { border-color: var(--cor-borda); color: var(--cor-texto); background: #fff; }
+.botao-contorno:hover { border-color: var(--cor-laranja); }
+.botao-contorno-claro { border-color: rgba(255,255,255,.35); color: #fff; background: transparent; }
+.botao-contorno-claro:hover { border-color: #fff; }
+.botao-grande { padding: 1rem 2rem; font-size: 1.1rem; }
+.botao-pequeno { padding: .55rem 1.2rem; font-size: .95rem; }
+.botao-cheio { display: block; width: 100%; }
+
+.icone { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+.revelar { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .6s ease; }
+.revelar.visivel { opacity: 1; transform: none; }
+
+/* =====================================================
+   3. TOPO / MENU
+   ===================================================== */
+#topo { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.92); backdrop-filter: blur(10px); border-bottom: 1px solid transparent; transition: border-color .25s, box-shadow .25s; }
+#topo.rolou { border-color: var(--cor-borda); box-shadow: 0 6px 20px rgba(11,18,32,.06); }
+.topo-interno { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; min-height: 68px; }
+.topo-marca { display: flex; align-items: center; gap: .7rem; text-decoration: none; font-family: var(--fonte-titulo); font-weight: 700; }
+.topo-logo-primeserv { background: var(--cor-fundo-escuro); color: #fff; padding: .3rem .8rem; border-radius: 10px; font-size: .95rem; }
+.menu-principal { display: flex; gap: 1.6rem; align-items: center; }
+.menu-principal a { text-decoration: none; font-size: .95rem; color: var(--cor-texto-suave); transition: color .2s; }
+.menu-principal a:hover { color: var(--cor-texto); }
+.topo-acoes { display: flex; align-items: center; gap: .6rem; }
+#botao-menu { display: none; background: none; border: 2px solid var(--cor-borda); color: var(--cor-texto); border-radius: 10px; padding: .4rem .8rem; font: inherit; cursor: pointer; }
+
+/* =====================================================
+   4. HERÓI (título + calculadora + relógio de fundo)
+   ===================================================== */
+#heroi { position: relative; overflow: hidden; background: radial-gradient(ellipse at 90% 10%, rgba(249,115,22,.12), transparent 55%), linear-gradient(180deg, #fff 0%, var(--cor-fundo-claro) 100%); }
+.heroi-relogio { position: absolute; z-index: 0; top: 50%; right: -4%; width: min(780px, 90vw); height: auto; transform: translateY(-50%); pointer-events: none; }
+.ponteiro-minutos { transform-origin: 300px 300px; animation: girar-ponteiro 14s linear infinite; }
+@keyframes girar-ponteiro { to { transform: rotate(360deg); } }
+.heroi-grade { position: relative; z-index: 1; display: grid; grid-template-columns: .95fr 1.05fr; gap: clamp(2rem, 4vw, 3.5rem); align-items: center; padding: clamp(2.5rem, 6vw, 4.5rem) 0; }
+.heroi-selo { display: inline-block; padding: .3rem .9rem; border-radius: 999px; background: var(--cor-laranja-claro); color: var(--cor-laranja-escuro); font-weight: 700; font-size: .9rem; margin-bottom: 1.2rem; }
+.heroi-titulo { font-size: clamp(2.4rem, 5.2vw, 4.1rem); letter-spacing: -.035em; margin-bottom: 1.1rem; }
+.heroi-texto { font-size: 1.3rem; color: var(--cor-texto-suave); max-width: 40ch; margin-bottom: 1.8rem; }
+.heroi-acoes { display: flex; flex-wrap: wrap; gap: .8rem; margin-bottom: 1.8rem; }
+.heroi-provas { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; color: var(--cor-texto-suave); font-size: .98rem; }
+.heroi-provas li::before { content: ""; display: inline-block; width: 10px; height: 6px; margin-right: .55rem; border-left: 2px solid var(--cor-laranja-escuro); border-bottom: 2px solid var(--cor-laranja-escuro); transform: translateY(-2px) rotate(-45deg); }
+
+/* ---- Calculadora ---- */
+.calculadora { background: #fff; border-radius: var(--raio-grande); border-top: 6px solid var(--cor-laranja); padding: clamp(1.4rem, 3.5vw, 2.2rem); box-shadow: var(--sombra-forte); }
+.calculadora-etiqueta { color: var(--cor-laranja-escuro); font-weight: 700; font-size: .9rem; margin-bottom: .3rem; }
+.calculadora-titulo { font-size: clamp(1.4rem, 2.6vw, 1.8rem); margin-bottom: 1.2rem; }
+.campo { margin-bottom: 1.1rem; }
+.campo label { display: block; font-weight: 700; margin-bottom: .4rem; font-size: .98rem; }
+.campo input[type="text"], .campo input[type="email"], .campo input[type="tel"], .campo input[type="number"], .campo select, .campo textarea { width: 100%; padding: .8rem 1rem; border: 2px solid transparent; border-radius: var(--raio-medio); font: inherit; background: var(--cor-campo); color: var(--cor-texto); }
+.campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--cor-laranja); outline: none; background: #fff; }
+.campo-boletos-linha { display: grid; grid-template-columns: 130px 1fr; gap: 1rem; align-items: center; }
+#campo-controle { width: 100%; accent-color: var(--cor-laranja); }
+.calculadora-resultado { background: linear-gradient(160deg, #0b1220, #16264a); border-radius: var(--raio-medio); padding: 1.3rem 1.5rem 1.2rem; box-shadow: inset 0 0 0 2px rgba(249,115,22,.6), 0 0 40px rgba(249,115,22,.22); margin-bottom: .9rem; }
+.resultado-numero { font: 700 clamp(3.2rem, 7vw, 5.2rem)/1 var(--fonte-titulo); letter-spacing: -.03em; color: #ff8a1f; text-shadow: 0 0 32px rgba(255,138,31,.55); font-variant-numeric: tabular-nums; }
+.resultado-numero #resultado-unidade { font-size: .4em; letter-spacing: -.01em; margin-left: .25em; color: #ffc08a; text-shadow: none; }
+.resultado-legenda { color: #d4dcec; font-weight: 500; margin: .5rem 0 1rem; }
+.resultado-comparacao { display: flex; flex-wrap: wrap; gap: .5rem; margin: 0; }
+.resultado-comparacao span { background: rgba(249,115,22,.2); color: #ffc08a; font-weight: 700; padding: .3rem .85rem; border-radius: 999px; font-size: .92rem; }
+.calculadora-base { color: var(--cor-texto-suave); font-size: .88rem; margin: 0 0 1rem; }
+
+/* =====================================================
+   5. FAIXA DE SEGMENTOS
+   ===================================================== */
+#faixa-segmentos { background: #fff; border-bottom: 1px solid var(--cor-borda); padding: 1.4rem 0; }
+.faixa-interna { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .6rem; color: var(--cor-texto-suave); }
+.faixa-interna strong { color: var(--cor-texto); margin-right: .6rem; }
+.faixa-interna span { padding: .3rem .9rem; border: 1px solid var(--cor-borda); border-radius: 999px; font-size: .95rem; background: var(--cor-fundo-claro); }
+
+/* =====================================================
+   6. MOTIVOS PARA COMPRAR (seção escura)
+   ===================================================== */
+.motivos-grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; margin-bottom: 2rem; }
+.motivo { padding: 1.7rem 1.5rem; border-radius: var(--raio-grande); background: var(--cor-fundo-escuro-2); border: 1px solid rgba(255,255,255,.08); transition: transform .25s, border-color .25s; }
+.motivo:hover { transform: translateY(-4px); border-color: rgba(249,115,22,.55); }
+.motivo-numero { display: block; font: 700 2.2rem/1 var(--fonte-titulo); color: var(--cor-laranja); margin-bottom: 1rem; }
+.motivo h3 { font-size: 1.3rem; color: #fff; }
+.motivo p { margin: 0; color: var(--cor-texto-claro-suave); font-size: .98rem; }
+.motivos-extras { display: flex; flex-wrap: wrap; justify-content: center; gap: .6rem; margin-bottom: 2.2rem; }
+.motivos-extras span { padding: .4rem 1rem; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: var(--cor-texto-claro); font-size: .95rem; }
+.centro-botao { text-align: center; }
+
+/* =====================================================
+   7. FAIXA DA PERDA (acompanha a calculadora)
+   ===================================================== */
+#faixa-perda { background: linear-gradient(90deg, #f97316, #ea580c); color: #1a0f05; padding: clamp(1.8rem, 4vw, 2.6rem) 0; }
+.perda-interna { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.2rem 2rem; }
+.perda-texto { font: 700 clamp(1.4rem, 3vw, 2.1rem)/1.2 var(--fonte-titulo); letter-spacing: -.02em; margin: 0; max-width: 34ch; }
+.perda-texto b { background: var(--cor-fundo-escuro); color: #ffb06a; padding: .05em .4em; border-radius: 8px; white-space: nowrap; }
+
+/* =====================================================
+   8. SEGMENTOS (cartões)
+   ===================================================== */
+.segmentos-grade { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+.segmento-cartao { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--cor-borda); border-radius: var(--raio-grande); padding: 1.6rem; transition: transform .25s, box-shadow .25s, border-color .25s; }
+.segmento-cartao:hover { transform: translateY(-4px); box-shadow: var(--sombra-suave); border-color: #f5c9a3; }
+.segmento-cartao h3 { font-size: 1.2rem; }
+.segmento-cartao p { color: var(--cor-texto-suave); font-size: .98rem; flex: 1; }
+.segmento-link { display: inline-flex; align-items: center; gap: .4rem; background: none; border: 0; padding: 0; font: 700 .95rem var(--fonte-texto); color: var(--cor-laranja-escuro); cursor: pointer; text-align: left; }
+.segmento-link .icone { width: 18px; height: 18px; transition: transform .2s; }
+.segmento-cartao:hover .segmento-link .icone { transform: translateX(4px); }
+
+/* =====================================================
+   9. ANTES E DEPOIS
+   ===================================================== */
+.rolagem-tabela { overflow-x: auto; max-width: 960px; margin: 0 auto; border-radius: var(--raio-medio); border: 1px solid var(--cor-borda); }
+.tabela-comparativa { width: 100%; min-width: 640px; border-collapse: collapse; background: #fff; }
+.tabela-comparativa th, .tabela-comparativa td { padding: 1rem 1.2rem; border-bottom: 1px solid var(--cor-borda); text-align: left; }
+.tabela-comparativa tbody tr:last-child td { border-bottom: 0; }
+.tabela-comparativa thead th { background: var(--cor-fundo-claro); font-family: var(--fonte-titulo); }
+.tabela-comparativa thead th:last-child { background: var(--cor-fundo-escuro); color: #fff; }
+.tabela-comparativa tbody td:last-child { font-weight: 700; background: #fff9f3; }
+.tabela-comparativa tbody td:nth-child(2) { color: var(--cor-texto-suave); }
+
+/* =====================================================
+   10. TRANQUILIDADE (segurança)
+   ===================================================== */
+.tranquilidade-lista { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.2rem; }
+.tranquilidade-item { padding: 1.5rem; border-radius: var(--raio-grande); background: var(--cor-fundo-escuro-2); border: 1px solid rgba(255,255,255,.08); }
+.tranquilidade-item .icone { color: var(--cor-laranja); margin-bottom: .9rem; width: 28px; height: 28px; }
+.tranquilidade-item h3 { font-size: 1.1rem; color: #fff; }
+.tranquilidade-item p { margin: 0; color: var(--cor-texto-claro-suave); font-size: .95rem; }
+
+/* =====================================================
+   11. COMO COMEÇAR
+   ===================================================== */
+.passos { list-style: none; padding: 0; margin: 0 0 2rem; display: grid; grid-template-columns: repeat(3, 1fr); counter-reset: passo; }
+.passo { position: relative; padding-right: 1.5rem; counter-increment: passo; }
+.passo::before { content: counter(passo); display: grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: var(--cor-laranja); color: #1a0f05; font: 700 1.2rem var(--fonte-titulo); margin-bottom: 1rem; position: relative; z-index: 1; }
+.passo::after { content: ""; position: absolute; top: 22px; left: 46px; right: 0; height: 2px; background: var(--cor-borda); }
+.passo:last-child::after { display: none; }
+.passo h3 { font-size: 1.3rem; }
+.passo p { color: var(--cor-texto-suave); margin: 0; }
+
+/* =====================================================
+   12. PERGUNTAS FREQUENTES
+   ===================================================== */
+.perguntas { max-width: 820px; margin: 0 auto; }
+.pergunta { border-bottom: 1px solid var(--cor-borda); }
+.pergunta summary { cursor: pointer; padding: 1.2rem 2rem 1.2rem 0; font: 700 1.15rem var(--fonte-titulo); list-style: none; position: relative; }
+.pergunta summary::-webkit-details-marker { display: none; }
+.pergunta summary::after { content: "+"; position: absolute; right: 0; top: 1rem; font-size: 1.6rem; color: var(--cor-laranja-escuro); transition: transform .2s; }
+.pergunta[open] summary::after { transform: rotate(45deg); }
+.pergunta p { color: var(--cor-texto-suave); padding-bottom: 1.2rem; margin: 0; }
+
+/* =====================================================
+   13. FECHAMENTO (oferta + formulário)
+   ===================================================== */
+#contato { background: radial-gradient(ellipse at 10% 100%, rgba(249,115,22,.22), transparent 55%), var(--cor-fundo-escuro); color: var(--cor-texto-claro); }
+.contato-bloco { display: grid; grid-template-columns: .9fr 1.1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+.contato-texto h2 { font-size: clamp(2.1rem, 4.4vw, 3.2rem); color: #fff; }
+.contato-texto > p { color: var(--cor-texto-claro-suave); font-size: 1.15rem; }
+.contato-lista { list-style: none; padding: 0; margin: 1.2rem 0 1.8rem; }
+.contato-lista li { padding: .4rem 0 .4rem 1.8rem; position: relative; }
+.contato-lista li::before { content: ""; position: absolute; left: 0; top: .8rem; width: 12px; height: 7px; border-left: 2px solid var(--cor-laranja); border-bottom: 2px solid var(--cor-laranja); transform: rotate(-45deg); }
+.demonstracao-bloco { padding: 1.3rem 1.4rem; border-radius: var(--raio-medio); border: 1px solid rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
+.demonstracao-bloco p { margin: 0 0 .7rem; color: var(--cor-texto-claro-suave); font-size: .98rem; }
+.demonstracao-endereco { display: inline-block; background: #fff; color: var(--cor-fundo-escuro); font: 700 1.15rem var(--fonte-titulo); padding: .55rem 1.3rem; border-radius: 999px; text-decoration: none; transition: transform .2s; }
+.demonstracao-endereco:hover { transform: translateY(-2px); }
+#formulario-contato { background: #fff; color: var(--cor-texto); border-radius: var(--raio-grande); padding: clamp(1.4rem, 3vw, 2.2rem); box-shadow: var(--sombra-forte); }
+.formulario-linha { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.progresso { margin: .2rem 0 1.4rem; }
+.progresso span { display: block; font-size: .9rem; color: var(--cor-texto-suave); margin-bottom: .4rem; }
+.progresso-trilho { height: 8px; background: var(--cor-campo); border-radius: 999px; overflow: hidden; }
+.progresso-barra { height: 100%; width: 50%; background: var(--cor-laranja); border-radius: 999px; transition: width .4s ease; }
+.etapa-formulario[hidden] { display: none; }
+.formulario-acoes { display: flex; flex-wrap: wrap; gap: .7rem; justify-content: flex-end; align-items: center; margin-top: .4rem; }
+.botao-voltar { background: none; border: 0; color: var(--cor-texto-suave); font: inherit; font-weight: 700; cursor: pointer; margin-right: auto; padding: .5rem 0; }
+#mensagem-formulario { margin: 1rem 0 0; font-size: .95rem; color: var(--cor-texto-suave); min-height: 1.4em; text-align: right; }
+
+/* =====================================================
+   14. RODAPÉ
+   ===================================================== */
+#rodape { background: #070c16; color: #8d9ab3; padding: 3rem 0 2rem; font-size: .95rem; }
+.rodape-colunas { display: grid; grid-template-columns: 1.6fr 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+.rodape-colunas h4 { color: #fff; font-size: 1rem; margin-bottom: .8rem; }
+.rodape-colunas ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .45rem; }
+.rodape-colunas a { text-decoration: none; }
+.rodape-colunas a:hover { color: #fff; }
+.rodape-marca { color: #fff; font: 700 1.2rem var(--fonte-titulo); margin-bottom: .6rem; }
+.rodape-direitos { border-top: 1px solid rgba(255,255,255,.1); padding-top: 1.2rem; font-size: .88rem; margin: 0; }
+
+/* =====================================================
+   14b. BOTÃO FLUTUANTE (falar com os especialistas)
+   ===================================================== */
+#botao-especialistas { position: fixed; right: 1.2rem; bottom: 1.2rem; z-index: 60; display: inline-flex; align-items: center; gap: .6rem; padding: .85rem 1.4rem; border-radius: 999px; background: var(--cor-laranja); color: #1a0f05; font-weight: 700; text-decoration: none; box-shadow: 0 10px 30px rgba(249,115,22,.4), 0 2px 8px rgba(11,18,32,.2); transition: transform .2s, background .2s, box-shadow .2s; }
+#botao-especialistas:hover { background: #ff8a3d; transform: translateY(-2px); box-shadow: 0 14px 34px rgba(249,115,22,.5), 0 2px 8px rgba(11,18,32,.2); }
+#botao-especialistas .icone { width: 22px; height: 22px; }
+
+/* =====================================================
+   15. RESPONSIVO
+   ===================================================== */
+@media (max-width: 960px) {
+  .heroi-grade, .contato-bloco { grid-template-columns: 1fr; }
+  .heroi-relogio { right: -40vw; width: 120vw; opacity: .7; }
+  .motivos-grade, .segmentos-grade, .tranquilidade-lista { grid-template-columns: 1fr 1fr; }
+  .passos { grid-template-columns: 1fr; row-gap: 1.5rem; }
+  .passo::after { display: none; }
+  .rodape-colunas { grid-template-columns: 1fr 1fr; }
+  #botao-menu { display: block; }
+  .menu-principal { display: none; position: absolute; top: 68px; left: 0; right: 0; flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.2rem 1.5rem; background: #fff; border-bottom: 1px solid var(--cor-borda); }
+  .menu-principal.aberto { display: flex; }
+}
+@media (max-width: 600px) {
+  #botao-especialistas { right: .8rem; bottom: .8rem; padding: .75rem 1.1rem; font-size: .95rem; }
+  .motivos-grade, .segmentos-grade, .tranquilidade-lista, .formulario-linha, .rodape-colunas { grid-template-columns: 1fr; }
+  .campo-boletos-linha { grid-template-columns: 1fr; }
+  .topo-logo-primeserv { font-size: .85rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .revelar { opacity: 1; transform: none; transition: none; }
+  .ponteiro-minutos { animation: none; }
+  * { transition: none !important; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- Ícones (não precisa editar) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <symbol id="icone-conversa" viewBox="0 0 24 24"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></symbol>
+  <symbol id="icone-seta" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="icone-cadeado" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+  <symbol id="icone-escudo" viewBox="0 0 24 24"><path d="M12 2 4 5v6c0 5 3.4 9.4 8 11 4.6-1.6 8-6 8-11V5l-8-3z"/><path d="m9 12 2 2 4-4"/></symbol>
+  <symbol id="icone-arquivo" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h6"/></symbol>
+  <symbol id="icone-pessoas" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2 21a7 7 0 0 1 14 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14a7 7 0 0 1 4 7"/></symbol>
+</svg>
+
+<!-- =====================================================
+     TOPO
+     ===================================================== -->
+<header id="topo">
+  <div class="conteudo topo-interno">
+    <a class="topo-marca" href="#inicio" aria-label="SGBB, início">
+      <span class="topo-logo-primeserv">PRIMESERV TI</span>
+      <span>SGBB</span>
+    </a>
+    <nav class="menu-principal" id="menu-principal" aria-label="Principal">
+      <a href="#motivos">Motivos</a>
+      <a href="#segmentos">Segmentos</a>
+      <a href="#como-comecar">Como começar</a>
+      <a href="#perguntas">Dúvidas</a>
+    </nav>
+    <div class="topo-acoes">
+      <a class="botao botao-principal botao-pequeno" href="#contato">Quero o SGBB</a>
+      <button id="botao-menu" type="button" aria-expanded="false" aria-controls="menu-principal">Menu</button>
+    </div>
+  </div>
+</header>
+
+<main id="inicio">
+
+<!-- =====================================================
+     HERÓI: promessa + CALCULADORA + relógio de fundo
+     ===================================================== -->
+<section id="heroi">
+
+  <!-- Relógio de fundo (decorativo). Tamanho e posição: classe .heroi-relogio no CSS -->
+  <svg class="heroi-relogio" viewBox="0 0 600 600" aria-hidden="true" focusable="false">
+    <circle cx="300" cy="300" r="270" fill="rgba(249,115,22,.05)"/>
+    <circle cx="300" cy="300" r="250" fill="none" stroke="#f97316" stroke-width="10" opacity=".5"/>
+    <circle cx="300" cy="300" r="215" fill="none" stroke="#0b1220" stroke-width="12" stroke-dasharray="3 19.51" transform="rotate(-90 300 300)" opacity=".16"/>
+    <circle cx="300" cy="300" r="215" fill="none" stroke="#0b1220" stroke-width="22" stroke-dasharray="6 106.57" transform="rotate(-90.9 300 300)" opacity=".22"/>
+    <line x1="300" y1="300" x2="300" y2="190" stroke="#0b1220" stroke-width="12" stroke-linecap="round" transform="rotate(48 300 300)" opacity=".25"/>
+    <g class="ponteiro-minutos"><line x1="300" y1="300" x2="300" y2="104" stroke="#f97316" stroke-width="8" stroke-linecap="round" opacity=".7"/></g>
+    <circle cx="300" cy="300" r="12" fill="#f97316" opacity=".7"/>
+  </svg>
+
+  <div class="conteudo heroi-grade">
+    <div class="heroi-texto-bloco revelar">
+      <span class="heroi-selo">Para quem cobra por boleto todo mês</span>
+      <h1 class="heroi-titulo">O melhor software de cobranças com <span class="destaque-laranja">IA integrada</span></h1>
+      <p class="heroi-texto">Você economiza tempo e organiza tudo em um só lugar.</p>
+      <div class="heroi-acoes">
+        <a class="botao botao-principal botao-grande" href="#contato">Quero o SGBB</a>
+        <a class="botao botao-contorno botao-grande" href="#contato">Testar agora</a>
+      </div>
+      <ul class="heroi-provas">
+        <li>Boleto com Pix</li>
+        <li>Baixa automática</li>
+        <li>Sem remessa e retorno</li>
+      </ul>
+    </div>
+
+    <!-- CALCULADORA (diferencial do site) -->
+    <div class="calculadora revelar" id="calculadora">
+      <p class="calculadora-etiqueta">Calculadora de tempo</p>
+      <h2 class="calculadora-titulo">Quantas horas você perde por mês emitindo boleto?</h2>
+      <div class="campo">
+        <label for="campo-boletos">Quantos boletos você emite por mês?</label>
+        <div class="campo-boletos-linha">
+          <input id="campo-boletos" type="number" min="0" value="200" inputmode="numeric">
+          <input id="campo-controle" type="range" min="0" max="3000" step="10" value="200" aria-label="Ajustar a quantidade de boletos por mês">
+        </div>
+      </div>
+      <div class="calculadora-resultado" aria-live="polite">
+        <div class="resultado-numero"><span id="resultado-horas">0</span><span id="resultado-unidade">horas</span></div>
+        <p class="resultado-legenda">por mês só digitando boletos</p>
+        <p class="resultado-comparacao">
+          <span id="resultado-ano">0 horas por ano</span>
+          <span id="resultado-dias">0 dias de trabalho por ano</span>
+        </p>
+      </div>
+      <p class="calculadora-base">Considerando <strong id="texto-minutos">3 minutos</strong> por boleto à mão e dia de trabalho de 8 horas.</p>
+      <a class="botao botao-principal botao-cheio" href="#contato">Quero recuperar esse tempo</a>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     FAIXA DE SEGMENTOS
+     ===================================================== -->
+<div id="faixa-segmentos">
+  <div class="conteudo faixa-interna">
+    <strong>Serve para:</strong>
+    <span>Condomínios</span><span>Escolas</span><span>Academias</span><span>Provedores</span><span>Clínicas</span><span>Imobiliárias</span><span>Associações</span><span>Comércio e serviços</span>
+  </div>
+  <!-- Quando tiver clientes e autorização, coloque aqui logos ou depoimentos. -->
+</div>
+
+<!-- =====================================================
+     MOTIVOS PARA COMPRAR
+     ===================================================== -->
+<section id="motivos" class="secao secao-escura">
+  <div class="conteudo">
+    <div class="cabecalho-secao revelar">
+      <h2 class="titulo-secao">8 motivos para ter o SGBB</h2>
+      <p class="subtitulo-secao">Menos trabalho para você. Mais controle sobre o que entra.</p>
+    </div>
+    <div class="motivos-grade">
+      <article class="motivo revelar"><span class="motivo-numero">01</span><h3>Chega de digitar boleto</h3><p>Recorrência e importação em lote emitem a carteira inteira de uma vez.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">02</span><h3>Baixa sem tocar em nada</h3><p>Integração direta com o banco. Sem remessa, sem retorno, sem conferir extrato.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">03</span><h3>Cobrança que não esquece</h3><p>Aviso ao emitir, antes do vencimento, no atraso e ao pagar. Sozinho.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">04</span><h3>Pagar fica fácil</h3><p>Pix copia e cola e QR Code no próprio boleto.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">05</span><h3>Quem deve, em segundos</h3><p>Painel com atraso por faixa de dias e maiores devedores.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">06</span><h3>Do lembrete ao protesto</h3><p>Segunda via, protesto e negativação em um clique, sem trocar de sistema.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">07</span><h3>Contas prontas em um clique</h3><p>Relatórios em PDF e Excel e trilha de auditoria de cada boleto.</p></article>
+      <article class="motivo revelar"><span class="motivo-numero">08</span><h3>Sua marca em cada boleto</h3><p>Logo e textos próprios para cada empresa ou unidade, em um só sistema.</p></article>
+    </div>
+    <div class="motivos-extras revelar">
+      <span>Acordos em até 99 parcelas</span>
+      <span>Multa e juros configuráveis</span>
+      <span>Desconto por pontualidade</span>
+      <span>Segunda via a qualquer momento</span>
+      <span>Perfis de acesso</span>
+      <span>Histórico de e-mails</span>
+    </div>
+    <div class="centro-botao revelar"><a class="botao botao-principal botao-grande" href="#contato">Quero o SGBB</a></div>
+  </div>
+</section>
+
+<!-- =====================================================
+     FAIXA DA PERDA (reflete o que foi digitado na calculadora)
+     ===================================================== -->
+<section id="faixa-perda">
+  <div class="conteudo perda-interna">
+    <p class="perda-texto">Com <b id="perda-boletos">200</b> boletos por mês, você gasta <b id="perda-ano">120 horas</b> por ano só emitindo. Deixe o SGBB fazer isso por você.</p>
+    <a class="botao botao-escuro botao-grande" href="#contato">Quero parar de perder tempo</a>
+  </div>
+</section>
+
+<!-- =====================================================
+     SEGMENTOS (edite em SEGMENTOS, no script)
+     ===================================================== -->
+<section id="segmentos" class="secao secao-clara">
+  <div class="conteudo">
+    <div class="cabecalho-secao revelar">
+      <h2 class="titulo-secao">Feito para o seu tipo de negócio</h2>
+      <p class="subtitulo-secao">Se você cobra todo mês, o SGBB trabalha para você.</p>
+    </div>
+    <div class="segmentos-grade" id="segmentos-grade"></div>
+  </div>
+</section>
+
+<!-- =====================================================
+     ANTES E DEPOIS
+     ===================================================== -->
+<section id="antes-depois" class="secao secao-branca">
+  <div class="conteudo">
+    <div class="cabecalho-secao revelar">
+      <h2 class="titulo-secao">Sua rotina hoje × com o SGBB</h2>
+    </div>
+    <div class="rolagem-tabela revelar">
+      <table class="tabela-comparativa">
+        <thead><tr><th>Tarefa</th><th>Hoje, no manual</th><th>Com o SGBB</th></tr></thead>
+        <tbody>
+          <tr><td>Emitir a cobrança mensal</td><td>Boleto a boleto, todo mês</td><td>Recorrência e lote</td></tr>
+          <tr><td>Avisar os clientes</td><td>Mensagens avulsas, uma a uma</td><td>E-mails automáticos</td></tr>
+          <tr><td>Confirmar pagamentos</td><td>Conferência manual de extrato</td><td>Baixa automática</td></tr>
+          <tr><td>Medir inadimplência</td><td>Planilhas e cruzamentos</td><td>Painel em tempo real</td></tr>
+          <tr><td>Atualizar um boleto</td><td>Pedido por telefone ou e-mail</td><td>Segunda via em um clique</td></tr>
+          <tr><td>Prestar contas</td><td>Relatório montado à mão</td><td>PDF e Excel em um clique</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     TRANQUILIDADE
+     ===================================================== -->
+<section id="tranquilidade" class="secao secao-escura">
+  <div class="conteudo">
+    <div class="cabecalho-secao revelar">
+      <h2 class="titulo-secao">Cobrança com tranquilidade</h2>
+    </div>
+    <div class="tranquilidade-lista">
+      <article class="tranquilidade-item revelar"><svg class="icone"><use href="#icone-cadeado"/></svg><h3>Conexão criptografada</h3><p>Seus dados protegidos no caminho.</p></article>
+      <article class="tranquilidade-item revelar"><svg class="icone"><use href="#icone-pessoas"/></svg><h3>Cada um vê o seu</h3><p>Perfis de acesso e dados isolados por grupo.</p></article>
+      <article class="tranquilidade-item revelar"><svg class="icone"><use href="#icone-escudo"/></svg><h3>Tudo registrado</h3><p>Trilha de auditoria: quem emitiu, excluiu ou protestou, e quando.</p></article>
+      <article class="tranquilidade-item revelar"><svg class="icone"><use href="#icone-arquivo"/></svg><h3>Prova do envio</h3><p>O PDF guardado exatamente como o cliente recebeu.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     COMO COMEÇAR
+     ===================================================== -->
+<section id="como-comecar" class="secao secao-branca">
+  <div class="conteudo">
+    <div class="cabecalho-secao revelar">
+      <h2 class="titulo-secao">Comece por um piloto</h2>
+      <p class="subtitulo-secao">Sem mudar tudo de uma vez.</p>
+    </div>
+    <ol class="passos revelar">
+      <li class="passo"><h3>Levantamento</h3><p>Conhecemos a sua carteira e os seus clientes.</p></li>
+      <li class="passo"><h3>Configuração</h3><p>Cadastro, identidade visual e importação da sua base.</p></li>
+      <li class="passo"><h3>Piloto e expansão</h3><p>Começamos por um grupo e expandimos.</p></li>
+    </ol>
+    <div class="centro-botao revelar"><a class="botao botao-principal botao-grande" href="#contato">Quero começar</a></div>
+  </div>
+</section>
+
+<!-- =====================================================
+     PERGUNTAS FREQUENTES
+     ===================================================== -->
+<section id="perguntas" class="secao secao-clara">
+  <div class="conteudo">
+    <div class="cabecalho-secao revelar">
+      <h2 class="titulo-secao">Últimas dúvidas</h2>
+    </div>
+    <div class="perguntas revelar">
+      <details class="pergunta">
+        <summary>Preciso trabalhar com arquivos de remessa e retorno?</summary>
+        <p>Não. A integração é direta com o banco, sem remessa, sem retorno e sem baixa manual.</p>
+      </details>
+      <details class="pergunta">
+        <summary>Dá para emitir tudo de uma vez?</summary>
+        <p>Dá. Suba a planilha CSV do mês ou configure a cobrança recorrente.</p>
+      </details>
+      <details class="pergunta">
+        <summary>E quem está atrasado?</summary>
+        <p>Recebe aviso automático, pode renegociar em até 99 parcelas e, se for preciso, você protesta e negativa pelo próprio sistema.</p>
+      </details>
+      <details class="pergunta">
+        <summary>Serve para o meu segmento?</summary>
+        <p>Se o seu negócio cobra por boleto de forma recorrente, sim: condomínios, escolas, academias, provedores, clínicas, imobiliárias, associações e serviços.</p>
+      </details>
+      <details class="pergunta">
+        <summary>Posso testar antes de contratar?</summary>
+        <p>Pode. Há uma demonstração em ambiente isolado, em que nada gera cobrança real.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================
+     FECHAMENTO: oferta + demonstração + formulário
+     ===================================================== -->
+<section id="contato" class="secao">
+  <div class="conteudo contato-bloco">
+    <div class="contato-texto revelar">
+      <h2>Pronto para cobrar no automático?</h2>
+      <p>Peça sua proposta e comece por um piloto.</p>
+      <ul class="contato-lista">
+        <li>Proposta sob medida para o seu volume</li>
+        <li>Sem compromisso</li>
+        <li>Veja funcionando antes de decidir</li>
+      </ul>
+      <div class="demonstracao-bloco">
+        <p>Teste agora. Ambiente isolado, nada gera cobrança real.</p>
+        <a class="demonstracao-endereco" href="https://sgbb.grupoaira.com.br/demo" target="_blank" rel="noopener">sgbb.grupoaira.com.br/demo</a>
+      </div>
+    </div>
+
+    <form id="formulario-contato" class="revelar" aria-labelledby="titulo-formulario">
+      <h3 id="titulo-formulario" style="position:absolute;left:-9999px">Solicite sua proposta</h3>
+      <div class="progresso">
+        <span id="contador-etapa">1/2</span>
+        <div class="progresso-trilho"><div class="progresso-barra" id="progresso-barra"></div></div>
+      </div>
+
+      <div class="etapa-formulario" data-etapa="1">
+        <div class="formulario-linha">
+          <div class="campo"><label for="campo-nome">Nome</label><input id="campo-nome" type="text" required autocomplete="name"></div>
+          <div class="campo"><label for="campo-email">E-mail</label><input id="campo-email" type="email" required autocomplete="email"></div>
+        </div>
+        <div class="formulario-linha">
+          <div class="campo"><label for="campo-telefone">WhatsApp</label><input id="campo-telefone" type="tel" required autocomplete="tel" placeholder="(00) 00000-0000"></div>
+          <div class="campo"><label for="campo-segmento">Segmento</label><select id="campo-segmento" required></select></div>
+        </div>
+        <div class="formulario-acoes">
+          <button type="button" id="botao-proximo" class="botao botao-principal">Próximo</button>
+        </div>
+      </div>
+
+      <div class="etapa-formulario" data-etapa="2" hidden>
+        <div class="formulario-linha">
+          <div class="campo"><label for="campo-empresa">Empresa</label><input id="campo-empresa" type="text" required autocomplete="organization"></div>
+          <div class="campo"><label for="campo-volume">Boletos por mês (aprox.)</label><input id="campo-volume" type="number" min="0" inputmode="numeric"></div>
+        </div>
+        <div class="campo"><label for="campo-mensagem">Como você cobra hoje? (opcional)</label><textarea id="campo-mensagem" rows="3"></textarea></div>
+        <div class="formulario-acoes">
+          <button type="button" id="botao-voltar" class="botao-voltar">Voltar</button>
+          <button type="submit" class="botao botao-principal" data-canal="whatsapp">Enviar pelo WhatsApp</button>
+          <button type="submit" class="botao botao-contorno" data-canal="email">Enviar por e-mail</button>
+        </div>
+      </div>
+      <p id="mensagem-formulario" role="status"></p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<!-- =====================================================
+     RODAPÉ
+     ===================================================== -->
+<footer id="rodape">
+  <div class="conteudo">
+    <div class="rodape-colunas">
+      <div>
+        <p class="rodape-marca">SGBB</p>
+        <p>Sistema Gerenciador de Boletos Bancários, um produto da Primeserv TI.</p>
+      </div>
+      <div>
+        <h4>Navegue</h4>
+        <ul>
+          <li><a href="#motivos">Motivos</a></li>
+          <li><a href="#segmentos">Segmentos</a></li>
+          <li><a href="#como-comecar">Como começar</a></li>
+          <li><a href="#perguntas">Dúvidas</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Contato</h4>
+        <ul id="rodape-contato"></ul>
+      </div>
+    </div>
+    <p class="rodape-direitos">Todos os direitos reservados © <span id="ano-atual"></span> Primeserv TI.</p>
+  </div>
+</footer>
+
+<!-- BOTÃO FLUTUANTE: canto inferior direito. Posição e cor: #botao-especialistas no CSS -->
+<a id="botao-especialistas" href="#contato"><svg class="icone"><use href="#icone-conversa"/></svg>Falar com os especialistas</a>
+
+<script>
+/* =====================================================
+   CONFIGURAÇÃO (edite aqui)
+   ===================================================== */
+// WhatsApp somente com números, com DDI e DDD. Exemplo: 5531999999999
+const NUMERO_WHATSAPP = "5500000000000";
+const EMAIL_COMERCIAL = "comercial@seudominio.com.br";
+
+// Valores fixos da calculadora
+const MINUTOS_POR_BOLETO = 3;
+const HORAS_POR_DIA_DE_TRABALHO = 8;
+
+/* =====================================================
+   SEGMENTOS (nome + frase de venda)
+   ===================================================== */
+const SEGMENTOS = [
+  { nome: "Condomínios e administradoras", frase: "Taxa emitida sozinha e prestação de contas pronta para o síndico." },
+  { nome: "Escolas e cursos", frase: "Mensalidades no automático e responsáveis avisados sem ocupar a secretaria." },
+  { nome: "Academias e clubes", frase: "Planos cobrados sozinhos e atraso avisado na hora." },
+  { nome: "Provedores de internet", frase: "Milhares de assinaturas com baixa automática." },
+  { nome: "Clínicas e consultórios", frase: "Tratamentos parcelados sem cobrança manual." },
+  { nome: "Imobiliárias e locação", frase: "Aluguel e encargos no mesmo boleto, com devedores à vista." },
+  { nome: "Associações e sindicatos", frase: "Contribuições em dia, com aviso automático." },
+  { nome: "Comércio e serviços", frase: "Contratos recorrentes cobrados sem sair da tela." }
+];
+
+/* =====================================================
+   FUNÇÕES GERAIS
+   ===================================================== */
+const reduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const formatoNumero = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+const formatoInteiro = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
+
+function plural(valor, singular, pluralTexto) {
+  return Math.round(valor * 10) / 10 === 1 ? singular : pluralTexto;
+}
+
+/* =====================================================
+   CALCULADORA
+   ===================================================== */
+const campoBoletos = document.getElementById("campo-boletos");
+const campoControle = document.getElementById("campo-controle");
+const resultadoHoras = document.getElementById("resultado-horas");
+const resultadoUnidade = document.getElementById("resultado-unidade");
+let horasExibidas = 0;
+let quadroAnimacao = 0;
+
+document.getElementById("texto-minutos").textContent =
+  MINUTOS_POR_BOLETO + (MINUTOS_POR_BOLETO === 1 ? " minuto" : " minutos");
+
+function animarHoras(destino) {
+  const inicio = horasExibidas;
+  const duracao = reduzirMovimento ? 0 : 450;
+  const t0 = performance.now();
+  cancelAnimationFrame(quadroAnimacao);
+  function passo(agora) {
+    const p = duracao ? Math.min((agora - t0) / duracao, 1) : 1;
+    const valor = inicio + (destino - inicio) * (1 - Math.pow(1 - p, 3));
+    resultadoHoras.textContent = formatoNumero.format(valor);
+    if (p < 1) { quadroAnimacao = requestAnimationFrame(passo); }
+    else { horasExibidas = destino; resultadoHoras.textContent = formatoNumero.format(destino); }
+  }
+  quadroAnimacao = requestAnimationFrame(passo);
+}
+
+function calcularHoras() {
+  const boletos = Math.max(parseFloat(campoBoletos.value) || 0, 0);
+  const horas = (boletos * MINUTOS_POR_BOLETO) / 60;
+  const ano = horas * 12;
+  const dias = ano / HORAS_POR_DIA_DE_TRABALHO;
+  animarHoras(horas);
+  resultadoUnidade.textContent = plural(horas, "hora", "horas");
+  document.getElementById("resultado-ano").textContent = formatoNumero.format(ano) + " " + plural(ano, "hora", "horas") + " por ano";
+  document.getElementById("resultado-dias").textContent = formatoNumero.format(dias) + " " + plural(dias, "dia", "dias") + " de trabalho por ano";
+  // Faixa laranja mais abaixo na página
+  document.getElementById("perda-boletos").textContent = formatoInteiro.format(boletos);
+  document.getElementById("perda-ano").textContent = formatoNumero.format(ano) + " " + plural(ano, "hora", "horas");
+}
+
+campoBoletos.addEventListener("input", () => {
+  campoControle.value = Math.min(parseFloat(campoBoletos.value) || 0, parseFloat(campoControle.max));
+  calcularHoras();
+});
+campoControle.addEventListener("input", () => {
+  campoBoletos.value = campoControle.value;
+  calcularHoras();
+});
+calcularHoras();
+
+/* =====================================================
+   BOTÃO "FALAR COM OS ESPECIALISTAS" (abre o WhatsApp)
+   ===================================================== */
+const botaoEspecialistas = document.getElementById("botao-especialistas");
+if (NUMERO_WHATSAPP !== "5500000000000") {
+  botaoEspecialistas.href = "https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent("Olá! Quero falar com um especialista do SGBB.");
+  botaoEspecialistas.target = "_blank";
+  botaoEspecialistas.rel = "noopener";
+}
+
+/* =====================================================
+   SEGMENTOS (cartões que levam ao formulário)
+   ===================================================== */
+const campoSegmento = document.getElementById("campo-segmento");
+campoSegmento.innerHTML = '<option value="">Selecione</option>' +
+  SEGMENTOS.map(s => '<option value="' + s.nome + '">' + s.nome + "</option>").join("") +
+  '<option value="Outro">Outro</option>';
+
+const gradeSegmentos = document.getElementById("segmentos-grade");
+SEGMENTOS.forEach(s => {
+  const cartao = document.createElement("article");
+  cartao.className = "segmento-cartao revelar";
+  cartao.innerHTML = "<h3>" + s.nome + "</h3><p>" + s.frase + "</p>" +
+    '<button type="button" class="segmento-link">Quero para o meu negócio <svg class="icone"><use href="#icone-seta"/></svg></button>';
+  cartao.querySelector("button").addEventListener("click", () => {
+    campoSegmento.value = s.nome;
+    document.getElementById("contato").scrollIntoView({ behavior: reduzirMovimento ? "auto" : "smooth" });
+  });
+  gradeSegmentos.appendChild(cartao);
+});
+
+/* =====================================================
+   FORMULÁRIO EM DUAS ETAPAS (abre WhatsApp ou e-mail já preenchido)
+   ===================================================== */
+const formularioContato = document.getElementById("formulario-contato");
+const mensagemFormulario = document.getElementById("mensagem-formulario");
+let etapaAtual = 1;
+let canalEscolhido = "whatsapp";
+
+function irParaEtapa(numero) {
+  etapaAtual = numero;
+  formularioContato.querySelectorAll(".etapa-formulario").forEach(e => { e.hidden = Number(e.dataset.etapa) !== numero; });
+  document.getElementById("contador-etapa").textContent = numero + "/2";
+  document.getElementById("progresso-barra").style.width = (numero * 50) + "%";
+  mensagemFormulario.textContent = "";
+}
+
+function avancarEtapa() {
+  const campos = formularioContato.querySelectorAll('.etapa-formulario[data-etapa="1"] input, .etapa-formulario[data-etapa="1"] select');
+  for (const campo of campos) {
+    if (!campo.checkValidity()) { campo.reportValidity(); return; }
+  }
+  const volume = document.getElementById("campo-volume");
+  if (!volume.value && campoBoletos.value) volume.value = campoBoletos.value;
+  irParaEtapa(2);
+}
+
+document.getElementById("botao-proximo").addEventListener("click", avancarEtapa);
+document.getElementById("botao-voltar").addEventListener("click", () => irParaEtapa(1));
+formularioContato.querySelectorAll("button[type=submit]").forEach(b =>
+  b.addEventListener("click", () => { canalEscolhido = b.dataset.canal; })
+);
+
+formularioContato.addEventListener("submit", (evento) => {
+  evento.preventDefault();
+  if (etapaAtual === 1) { avancarEtapa(); return; }
+  const valor = id => document.getElementById(id).value.trim();
+  const texto =
+    "Olá! Quero uma proposta do SGBB.\n" +
+    "Nome: " + valor("campo-nome") + "\n" +
+    "Empresa: " + valor("campo-empresa") + "\n" +
+    "WhatsApp: " + valor("campo-telefone") + "\n" +
+    "E-mail: " + valor("campo-email") + "\n" +
+    "Segmento: " + valor("campo-segmento") + "\n" +
+    "Boletos por mês: " + (valor("campo-volume") || "não informado") + "\n" +
+    "Como cobra hoje: " + (valor("campo-mensagem") || "não informado");
+
+  if (canalEscolhido === "whatsapp") {
+    window.open("https://wa.me/" + NUMERO_WHATSAPP + "?text=" + encodeURIComponent(texto), "_blank", "noopener");
+  } else {
+    window.location.href = "mailto:" + EMAIL_COMERCIAL + "?subject=" + encodeURIComponent("Proposta SGBB") + "&body=" + encodeURIComponent(texto);
+  }
+  mensagemFormulario.textContent = "Pronto! Confirme o envio na janela que abriu.";
+});
+
+/* =====================================================
+   RODAPÉ
+   ===================================================== */
+document.getElementById("ano-atual").textContent = new Date().getFullYear();
+document.getElementById("rodape-contato").innerHTML =
+  '<li><a href="mailto:' + EMAIL_COMERCIAL + '">' + EMAIL_COMERCIAL + '</a></li>' +
+  '<li><a href="https://wa.me/' + NUMERO_WHATSAPP + '" target="_blank" rel="noopener">WhatsApp</a></li>' +
+  '<li><a href="https://sgbb.grupoaira.com.br/demo" target="_blank" rel="noopener">Demonstração</a></li>';
+
+/* =====================================================
+   MENU, CABEÇALHO E ENTRADA SUAVE
+   ===================================================== */
+const topo = document.getElementById("topo");
+const botaoMenu = document.getElementById("botao-menu");
+const menuPrincipal = document.getElementById("menu-principal");
+
+window.addEventListener("scroll", () => { topo.classList.toggle("rolou", window.scrollY > 8); }, { passive: true });
+botaoMenu.addEventListener("click", () => {
+  const aberto = menuPrincipal.classList.toggle("aberto");
+  botaoMenu.setAttribute("aria-expanded", aberto);
+});
+menuPrincipal.addEventListener("click", (e) => {
+  if (e.target.tagName === "A") { menuPrincipal.classList.remove("aberto"); botaoMenu.setAttribute("aria-expanded", "false"); }
+});
+
+const itensRevelar = document.querySelectorAll(".revelar");
+if ("IntersectionObserver" in window && !reduzirMovimento) {
+  const observador = new IntersectionObserver((entradas) => {
+    entradas.forEach(entrada => {
+      if (entrada.isIntersecting) { entrada.target.classList.add("visivel"); observador.unobserve(entrada.target); }
+    });
+  }, { threshold: 0.12 });
+  itensRevelar.forEach(item => observador.observe(item));
+} else {
+  itensRevelar.forEach(item => item.classList.add("visivel"));
+}
+</script>
+</body>
+</html>
